@@ -29,10 +29,36 @@ export default function AdminBookings() {
     }
   };
 
+  const handleTestEmail = async () => {
+    if (!confirm("Send a test notification email to yourself?")) return;
+    try {
+      const res = await fetch("/api/notifications?test=true", {
+        headers: {
+          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || "super_secret_string_123"}`
+        }
+      });
+      const data = await res.json();
+      if (data.success) alert("Test email sent! Check your inbox.");
+      else alert("Error: " + data.error);
+    } catch (e: any) {
+      alert("Failed to trigger: " + e.message);
+    }
+  };
+
   if (loading) return <div className="p-8 text-center text-slate-500">Loading bookings...</div>;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="space-y-4">
+      <div className="flex justify-end px-2">
+        <button
+          onClick={handleTestEmail}
+          className="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-4 py-2 rounded-lg border border-indigo-200 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+        >
+          📧 Send Test Notification
+        </button>
+      </div>
+
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="p-4 border-b border-slate-100 bg-slate-50/50">
         <h2 className="font-semibold text-slate-800">All Scheduled Sessions</h2>
       </div>

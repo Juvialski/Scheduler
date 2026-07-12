@@ -9,12 +9,25 @@ import { DateTime } from "luxon";
 // Looking at the error, it seems it doesn't find the classes.
 
 export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const isTest = searchParams.get("test") === "true";
+
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
+    if (isTest) {
+      await sendEmailViaApi(
+        process.env.NEXT_PUBLIC_TUTOR_EMAIL || "",
+        "Tutor Test",
+        "🔔 System Check: Email Notifications Working",
+        "If you are reading this, your Brevo API key and Sender Email are configured correctly. Reminders will now send automatically 5-30 mins before sessions."
+      );
+      return NextResponse.json({ success: true, message: "Test email sent" });
+    }
+
     const now = DateTime.now();
     // Logic: Look for sessions starting between 5 minutes and 35 mins from now.
     // This allows us to send a reminder very close to the meeting start.
