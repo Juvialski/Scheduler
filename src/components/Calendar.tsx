@@ -503,7 +503,6 @@ export default function Calendar() {
                               key={`avail-${i}`}
                               disabled={isAdmin || isFullyPast}
                               onClick={() => {
-                                // If ongoing, suggest the next 15-min interval
                                 if (isOngoing) {
                                   const roundedNow = now.plus({ minutes: 15 - (now.minute % 15) }).set({ second: 0, millisecond: 0 });
                                   setSelectedStartTime(roundedNow < end ? roundedNow : start);
@@ -512,11 +511,22 @@ export default function Calendar() {
                                 }
                               }}
                               className={clsx(
-                                "absolute left-1 right-1 rounded-xl md:rounded-2xl border-2 shadow-sm pointer-events-auto transition-all flex flex-col items-center justify-center text-center p-2",
+                                "absolute left-1 right-1 rounded-xl md:rounded-2xl border-2 shadow-sm pointer-events-auto transition-all flex flex-col items-center justify-center text-center p-2 group",
                                 isFullyPast ? "bg-slate-100 border-slate-200 opacity-40 cursor-not-allowed" : "bg-emerald-500 border-emerald-600 hover:bg-emerald-600 z-20"
                               )}
                               style={{ top: `${top}px`, height: `${height}px` }}
                             >
+                               {isAdmin && !isFullyPast && (
+                                 <button
+                                   className="absolute top-2 right-2 p-1.5 bg-white/20 hover:bg-red-500 text-white rounded-lg transition-all opacity-0 group-hover:opacity-100 z-50 pointer-events-auto shadow-sm"
+                                   onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleAdminToggleSlot(start);
+                                   }}
+                                 >
+                                   <Trash2 className="w-3.5 h-3.5" />
+                                 </button>
+                               )}
                                <span className="text-[8px] md:text-[10px] font-black uppercase text-emerald-100 tracking-widest mb-0.5">
                                  {isFullyPast ? "PAST" : "OPEN"}
                                </span>
