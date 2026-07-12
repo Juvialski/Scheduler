@@ -47,6 +47,22 @@ export default function Calendar() {
   const fetchData = async () => {
     try {
       console.log("Fetching fresh data from Firestore...");
+      // ... existing logic ...
+
+      // Trigger notification check in the background when the calendar is loaded
+      // (This removes the need for a separate CRON job)
+      const triggerNotifications = async () => {
+        try {
+          fetch("/api/notifications", {
+            headers: {
+              "Authorization": `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || "super_secret_string_123"}`
+            }
+          });
+        } catch (e) {
+          console.error("Notification trigger failed", e);
+        }
+      };
+      triggerNotifications();
       const weeklySnap = await getDoc(doc(db, "settings", "tutor_availability"));
       let fetchedWeekly = {};
       if (weeklySnap.exists()) {
