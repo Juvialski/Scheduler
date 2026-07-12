@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Check if user is the admin (tutor)
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == "al.matubis17@gmail.com";
+    }
+
+    // Settings (Availability)
+    match /settings/tutor_availability {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Overrides
+    match /availability_overrides/{date} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Bookings
+    match /bookings/{bookingId} {
+      allow read: if true; // Everyone can see booked slots to avoid overlaps
+      allow create: if request.auth != null; // Any logged in user can book
+      allow update, delete: if isAdmin(); // Only admin can modify/cancel
+    }
+  }
+}
