@@ -16,12 +16,15 @@ export async function GET(request: Request) {
 
   try {
     const now = DateTime.now();
-    const soon = now.plus({ hours: 24 });
+    // Logic: Look for sessions starting between 1 hour and 1 hour 30 mins from now.
+    // This allows us to send a reminder roughly 1 hour before the meeting.
+    const startRange = now.plus({ minutes: 30 });
+    const endRange = now.plus({ hours: 2 });
 
     const q = query(
       collection(db, "bookings"),
-      where("startTime", ">=", Timestamp.fromDate(now.toJSDate())),
-      where("startTime", "<=", Timestamp.fromDate(soon.toJSDate())),
+      where("startTime", ">=", Timestamp.fromDate(startRange.toJSDate())),
+      where("startTime", "<=", Timestamp.fromDate(endRange.toJSDate())),
       where("notified", "==", false)
     );
 
