@@ -129,7 +129,9 @@ export default function Calendar() {
     const existingIntervals = getTutorAvailabilityIntervals(slotPH.startOf("day"), weekly, overrides);
 
     let newIntervals: Interval[] = [];
-    const isAlreadyAvailable = existingIntervals.some(ai => ai.contains(slotPH) || ai.equals(hourInterval));
+    const isAlreadyAvailable = existingIntervals.some(ai =>
+      (ai.start! <= slotPH && ai.end! > slotPH) || ai.equals(hourInterval)
+    );
 
     if (isAlreadyAvailable) {
       // REMOVE: Subtract this hour from existing intervals

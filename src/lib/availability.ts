@@ -113,7 +113,10 @@ export function isSlotAvailable(
     availabilityIntervals.push(...getTutorAvailabilityIntervals(d, weekly, overrides));
   });
 
-  const isWithinAvailability = availabilityIntervals.some(ai => ai.contains(proposedInterval) || ai.equals(proposedInterval));
+  // Check if proposed is contained in ANY availability interval
+  const isWithinAvailability = availabilityIntervals.some(ai =>
+    ai.contains(proposedInterval.start!) && ai.contains(proposedInterval.end!)
+  );
   if (!isWithinAvailability) return false;
 
   const hasConflict = bookings.some(b => {
