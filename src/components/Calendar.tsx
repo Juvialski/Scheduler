@@ -228,12 +228,22 @@ export default function Calendar() {
   };
 
   const handleDeleteBooking = async (id: string) => {
-    if (!isAdmin || !confirm("Delete this booking?")) return;
+    // Check if user is owner or admin
+    const booking = bookings.find(b => b.id === id);
+    const isOwner = user && booking?.clientId === user.uid;
+
+    if (!isAdmin && !isOwner) {
+      alert("You can only delete your own bookings.");
+      return;
+    }
+
+    if (!confirm("Cancel this booking?")) return;
     try {
       await deleteDoc(doc(db, "bookings", id));
       await fetchData();
     } catch (e) {
       console.error("Delete error", e);
+      alert("Failed to delete booking.");
     }
   };
 
@@ -560,29 +570,43 @@ export default function Calendar() {
 
                           const top = (start.hour * ROW_HEIGHT) + (start.minute / 60 * ROW_HEIGHT);
                           const height = (end.diff(start, "minutes").minutes / 60) * ROW_HEIGHT;
-                          const isPast = start < DateTime.now();
+                          const isPast = start < now;
+
+                          // Privacy logic: Only show the child name if the user is the admin or the owner of the booking
+                          const isOwner = user && b.clientId === user.uid;
+                          const canSeeName = isAdmin || isOwner;
+                          const canDelete = isAdmin || (isOwner && !isPast);
 
                           return (
                             <div
                               key={`booking-${i}`}
                               className={clsx(
-                                "absolute left-1 md:left-1.5 right-1 md:right-1.5 border-2 rounded-xl md:rounded-2xl p-2 md:p-4 border-l-4 md:border-l-[8px] flex flex-col justify-center items-center text-center overflow-hidden shadow-md z-30",
-                                isAdmin ? "bg-indigo-50 border-indigo-200 border-l-indigo-600" : "bg-slate-100 border-slate-200 border-l-slate-400 opacity-60"
+                                "absolute left-1 md:left-1.5 right-1 md:right-1.5 border-2 rounded-xl md:rounded-2xl p-2 md:p-4 border-l-4 md:border-l-[8px] flex flex-col justify-center items-center text-center overflow-hidden shadow-md z-30 transition-all",
+                                isAdmin ? "bg-indigo-50 border-indigo-200 border-l-indigo-600" :
+                                isOwner ? "bg-emerald-50 border-emerald-200 border-l-emerald-600" :
+                                "bg-slate-100 border-slate-200 border-l-slate-400 opacity-60"
                               )}
                               style={{ top: `${top}px`, height: `${height}px` }}
                             >
-                               <div className="flex justify-between items-start mb-0.5 md:mb-1 absolute top-2 left-2 right-2 md:top-3 md:left-3 md:right-3 pointer-events-none">
-                                 <span className="text-[7px] md:text-[9px] font-black uppercase text-slate-500 tracking-widest">BOOKED</span>
-                                 {isAdmin && !isPast && (
+                               <div className="flex justify-between items-start mb-0.5 md:mb-1 absolute top-2 left-2 right-2 md:top-3 md:left-3 md:right-3">
+                                 <span className="text-[7px] md:text-[9px] font-black uppercase text-slate-500 tracking-widest">
+                                   {isOwner ? "YOUR SESSION" : "BOOKED"}
+                                 </span>
+                                 {canDelete && (
                                    <button
-                                      className="text-slate-400 hover:text-red-600 transition-colors pointer-events-auto"
-                                      onClick={() => handleDeleteBooking(b.id)}
+                                      className="text-slate-400 hover:text-red-600 transition-colors pointer-events-auto p-1 bg-white/50 rounded-md"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteBooking(b.id);
+                                      }}
                                    >
                                      <Trash2 className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                    </button>
                                  )}
                                </div>
-                               <span className="text-xs md:text-base font-black text-slate-900 truncate tracking-tight w-full px-2">{b.childName}</span>
+                               <span className="text-xs md:text-base font-black text-slate-900 truncate tracking-tight w-full px-2">
+                                 {canSeeName ? b.childName : "Reserved"}
+                               </span>
                                <span className="text-[9px] md:text-[10px] font-black text-slate-400">
                                  {start.toFormat("h:mm")} - {end.toFormat("h:mm a")}
                                </span>

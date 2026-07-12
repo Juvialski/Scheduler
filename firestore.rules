@@ -22,9 +22,10 @@ service cloud.firestore {
 
     // Bookings
     match /bookings/{bookingId} {
-      allow read: if true; // Everyone can see booked slots to avoid overlaps
-      allow create: if request.auth != null; // Any logged in user can book
-      allow update, delete: if isAdmin(); // Only admin can modify/cancel
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow delete: if isAdmin() || (request.auth != null && request.auth.uid == resource.data.clientId);
+      allow update: if isAdmin();
     }
   }
 }
