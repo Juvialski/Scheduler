@@ -91,6 +91,8 @@ export default function Calendar() {
   }, [user]);
 
   useEffect(() => {
+    setNow(DateTime.now().setZone(timezone));
+
     const timer = setInterval(() => {
       setNow(DateTime.now().setZone(timezone));
     }, 60000);
