@@ -14,6 +14,8 @@ export interface Booking {
   startTime: Date;
   endTime: Date;
   childName: string;
+  clientId: string;
+  clientEmail: string;
 }
 
 export interface Override {

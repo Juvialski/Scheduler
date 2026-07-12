@@ -79,9 +79,11 @@ export default function Calendar() {
         id: d.id,
         startTime: d.data().startTime.toDate(),
         endTime: d.data().endTime.toDate(),
-        childName: d.data().childName
+        childName: d.data().childName,
+        clientId: d.data().clientId,
+        clientEmail: d.data().clientEmail
       }));
-      setBookings(fetchedBookings);
+      setBookings(fetchedBookings as Booking[]);
 
       console.log("Sync Complete:", {
         weekly: Object.keys(fetchedWeekly).length,
